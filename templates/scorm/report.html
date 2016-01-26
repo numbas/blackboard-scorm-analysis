@@ -1,0 +1,117 @@
+{% extends "scorm/base.html" %}
+
+{% block includes %}
+{{super()}}
+<style type="text/css">
+	.objective-table .question-number {
+		text-align: right;
+	}
+
+	.interaction-table .question-header {
+		text-align: left;
+		padding: 2em 0 1em 0;
+		font-size: 1.2em;
+	}
+	.interaction-table .question-header .name {
+		font-weight: normal;
+		font-style: italic;
+	}
+
+	table th {
+		text-align: left;
+	}
+
+	.interaction-table .response {
+		font-family: monospace;
+	}
+
+	.interaction.gapfill, .interaction.information {
+		color: #999;
+	}
+
+	.score.raw {
+		padding-right: 0;
+		text-align: right;
+	}
+
+	.score.max {
+		padding-left: 0;
+	}
+
+	.score.max:before {
+		content: '/';
+		margin: 0 0.3em;
+	}
+
+	.xml {
+		word-wrap: break-word;
+	}
+</style>
+{% endblock includes %}
+
+{% block header %}
+	{{super()}}
+	<hr/>
+	<h3>Attempt by {{attempt.user.fullname}} {{attempt.user.username}}</h3>
+{% endblock header %}
+
+{% block scormcontent %}
+
+	<p class="run"><a href="{{url_for('review',pk=scorm.pk,attempt=attempt.pk)}}">Run in review mode</a></p>
+
+	<table class="info">
+		<tr><th>Attempt number</th><td>{{attempt.number}}</td></tr>
+		<tr><th>Start time</th><td>{{attempt.start_time}}</td></tr>
+		<tr><th>Duration</th><td>{{attempt.duration}}</td></tr>
+	</table>
+
+	<h4>Questions</h4>
+
+	<table class="objective-table">
+		<thead>
+			<tr>
+				<th>Question</th>
+				<th colspan="2">Score</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for objective in attempt.objectives %}
+			<tr>
+				<td class="question-number"><a href="#question-{{objective.question}}">{{objective.question}}</a></td>
+				<td class="score raw {{(objective.raw_score/objective.max_score)|correctstyle}}">{{objective.raw_score}}</td>
+				<td class="score max {{(objective.raw_score/objective.max_score)|correctstyle}}">{{objective.max_score}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<h4>Parts</h4>
+
+	<table class="interaction-table">
+		{% for question,interactions in attempt.interactions_by_question %}
+		<tr>
+			<th class="question-header" colspan="6" id="question-{{question.question}}">Question {{question.question}} - <span class="name">{{question.name}}</span></th>
+		</tr>
+		<tr>
+			<th></th>
+			<th>Type</th>
+			<th>Learner's response</th>
+			<th>Correct response</th>
+			<th colspan="2">Score</th>
+		</tr>
+		{% for interaction in interactions %}
+		<tr class="interaction {{interaction.part_type}}">
+			<td class="part">{{interaction.name}}</td>
+			<td class="type">{{interaction.part_type_name}}</td>
+			<td class="response learner">{{interaction.learner_response}}</td>
+			<td class="response correct">{{interaction.correct_response}}</td>
+			<td class="score raw">{{interaction.raw_score}}</td>
+			<td class="score max">{{interaction.max_score}}</td>
+		</tr>
+		{% endfor %}
+		{% endfor %}
+	</table>
+
+	<h4>Suspend data</h4>
+	<pre>{{attempt.suspend_data|pretty_json}}</pre>
+{% endblock scormcontent %}

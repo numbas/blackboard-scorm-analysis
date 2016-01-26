@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{scorm.title}} - {{super()}}{% endblock title %}
+
+{% block header %}
+	{{super()}}
+	<hr/>
+	<h2><a href="{{url_for('view_scorm',pk=scorm.pk)}}">{{scorm.title}}</a></h2>
+{% endblock header %}
+
+{% block content %}
+
+	{% block scormcontent %}{% endblock scormcontent %}
+{% endblock content %}
+

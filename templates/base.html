@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+	<head>
+		{% block head %}
+		<title>{% block title %}Blackboard reader{% endblock title %}</title>
+
+		{% block includes %}
+		<style type="text/css">
+			html {
+				font-size: 16px;
+				font-family: sans-serif;
+			}
+			header {
+				border-bottom: 3px solid #ccc;
+				margin-bottom: 2em;
+				display: flex;
+			}
+			header > * {
+				display: inline-block;
+				margin: 1rem 1rem 1rem 0;
+				align-self: flex-end;
+			}
+			header > hr {
+				border: none;
+				font-size: 2rem;
+			}
+			header > hr::before {
+				content: '❯';
+			}
+			header > :first-child {
+				margin-left: 0;
+			}
+			table {
+				border-collapse: collapse;
+			}
+			h1 a, h2 a, h3 a, h4 a {
+				text-decoration: none;
+			}
+
+			table td, table th {
+				padding: 0.2em 0.5em;
+			}
+
+			table th a {
+				text-decoration: none;
+			}
+
+
+			footer {
+				margin-top: 5em;
+				color: #888;
+				max-width: 40em;
+				margin-left: auto;
+				margin-right: auto;
+			}
+
+			.correct-0 { background-color: hsl(0,50%,80%); }
+			.correct-1 { background-color: hsl(12,50%,80%); }
+			.correct-2 { background-color: hsl(24,50%,80%); }
+			.correct-3 { background-color: hsl(36,50%,80%); }
+			.correct-4 { background-color: hsl(48,50%,80%); }
+			.correct-5 { background-color: hsl(60,50%,80%); }
+			.correct-6 { background-color: hsl(72,50%,80%); }
+			.correct-7 { background-color: hsl(84,50%,80%); }
+			.correct-8 { background-color: hsl(96,50%,80%); }
+			.correct-9 { background-color: hsl(108,50%,80%); }
+			.correct-10 { background-color: hsl(120,50%,80%); }
+		</style>
+		{% endblock includes %}
+		{% endblock head %}
+	</head>
+	<body>
+		<header>
+		{% block header %}
+			<h1><a href="{{url_for('index')}}">Blackboard SCORM reader</a></h1>
+		{% endblock header %}
+		</header>
+
+		{% block content %}{% endblock content %}
+
+		<footer>
+		</footer>
+	</body>
+</html>

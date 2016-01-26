@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Upload an archive{% endblock title %}
+
+{% block content %}
+<h2>Please upload a Blackboard archive zip</h2>
+<form action="" method="post" enctype="multipart/form-data">
+  <input type=file name=file> <input type=submit value=Upload>
+</form>
+
+{% if current_zip %}{{current_zip.filename}}{% endif %}
+
+{% endblock content %}

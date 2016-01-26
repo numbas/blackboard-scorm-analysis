@@ -1,0 +1,43 @@
+{% extends "scorm/base.html" %}
+
+{% block includes %}
+{{super()}}
+
+<style type="text/css">
+	iframe {
+		width: 100%;
+		height: 40em;
+	}
+</style>
+<script type="text/javascript" src="{{url_for('static',filename='scorm/api.js')}}"></script>
+<script type="text/javascript">
+	var cmi = {{cmi|tojson|safe}};
+	window.API_1484_11 = new SCORM_API(cmi);
+
+	window.addEventListener('load',function() {
+		var iframe = document.getElementById('scorm-player');
+
+		function resize_iframe() {
+			if(!iframe.contentWindow) {
+				return;
+			}
+			try {
+				var dh = document.documentElement.getBoundingClientRect().bottom;
+				var ih = iframe.clientHeight;
+				var oh = dh-ih;
+				var wh = window.innerHeight;
+				var h = wh-oh-10;
+				var height = Math.max(500,h);
+				iframe.style.height = height+'px';
+			} catch(e) {
+			}
+		}
+		setInterval(resize_iframe,500);
+	});
+
+</script>
+{% endblock includes %}
+
+{% block scormcontent %}
+	<iframe id="scorm-player" src="{{iframe}}"></iframe>
+{% endblock scormcontent %}

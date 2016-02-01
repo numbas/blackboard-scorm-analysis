@@ -107,13 +107,14 @@
 	<table class="objective-table">
 		<thead>
 			<tr>
-				<th>Question</th>
+				<th colspan="2">Question</th>
 				<th colspan="2">Score</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for objective in attempt.objectives %}
 			<tr>
+				<td class="question-name"><a href="#question-{{objective.question}}">{{objective.name}}</a></td>
 				<td class="question-number"><a href="#question-{{objective.question}}">{{objective.question}}</a></td>
 				<td class="score raw {{(objective.raw_score/objective.max_score)|correctstyle}}">{{objective.raw_score}}</td>
 				<td class="score max {{(objective.raw_score/objective.max_score)|correctstyle}}">{{objective.max_score}}</td>

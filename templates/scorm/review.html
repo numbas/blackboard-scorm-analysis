@@ -38,6 +38,12 @@
 </script>
 {% endblock includes %}
 
+{% block header %}
+	{{super()}}
+	<hr/>
+	<h3><a href="{{url_for('attempt_report',course=course.pk,scorm=scorm.pk,attempt=attempt.pk)}}">Attempt {{attempt.number}} by {{attempt.user.fullname}} {{attempt.user.username}}</a></h3>
+{% endblock header %}
+
 {% block scormcontent %}
 	<iframe id="scorm-player" src="{{iframe}}"></iframe>
 {% endblock scormcontent %}

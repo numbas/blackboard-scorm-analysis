@@ -19,9 +19,7 @@
 
 .course .num-scorms {
     color: #666;
-    /* float: right; */
     display: inline-block;
-    /* line-height: 2.4em; */
 }
 
 .courses {
@@ -41,6 +39,6 @@
 		{% endfor %}
 	</ul>
 
-	<p><a href="{{url_for('upload_zip')}}">Upload a zip file</a></p>
+	<p>Add another course or update an existing one: <a href="{{url_for('upload_zip')}}">upload a zip file</a></p>
 
 {% endblock content %}

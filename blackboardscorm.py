@@ -281,7 +281,7 @@ class State(object):
 
 	def add_course(self,course):
 		if course.pk in self.courses_by_pk:
-			i = self.courses.index(course.pk)
+			i = [c.pk for c in self.courses].index(course.pk)
 			self.courses[i] = course
 		else:
 			self.courses.append(course)

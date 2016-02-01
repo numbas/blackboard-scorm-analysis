@@ -2,10 +2,54 @@
 
 {% block title %}Upload an archive{% endblock title %}
 
+{% block includes %}
+	{{super()}}
+
+	<style type="text/css">
+		.upload-form {
+			margin-top: 2em;
+			padding: 1em;
+			text-align: center;
+		}
+
+
+		.upload-form input[type="file"] {
+			width: 20rem;
+			height: 4rem;
+			padding: 1em;
+			background: hsl(240, 40%, 93%);
+			margin: 1em auto;
+			display: block;
+			border-radius: 2px;
+		}
+
+		.upload-form button {
+			width: 20rem;
+			border: none;
+			padding: 0.5em;
+			font-size: 1.4em;
+			border-radius: 2px;
+			background: hsl(240, 70%, 93%);
+			margin: 0 auto;
+			display: block;
+		}
+	</style>
+{% endblock includes %}
+
 {% block content %}
-<h2>Please upload a Blackboard archive zip</h2>
-<form action="" method="post" enctype="multipart/form-data">
-  <input type=file name=file> <input type=submit value=Upload>
+<h2>Upload a Blackboard archive zip</h2>
+<p><strong>How to use this:</strong></p>
+<ul>
+	<li>Go to your Blackboard course, and click on <em>Packages and Utilities</em>, then <em>Export/Archive Organisation</em>.</li>
+	<li>Click on the <em>Archive Organisation</em> button.</li>
+	<li>In the following form, make sure <em>Inclue Grade Centre History</em> is ticked, then click <em>Submit</em>.</li>
+	<li>It takes a while to create the archive. You'll get an email when it's ready - once that happens, go back to the <em>Export/Archive Organisation</em> page and click on the .zip file to download it.</li>
+	<li>Come back here, and upload your file.</li>
+</ul>
+
+<form class="upload-form" action="" method="post" enctype="multipart/form-data">
+	<input type=file name=file> 
+	<button type=submit>Upload your archive</button>
 </form>
 
 {% if current_zip %}{{current_zip.filename}}{% endif %}

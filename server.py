@@ -64,7 +64,6 @@ def allowed_file(filename):
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_zip():
 	global state
-	next = request.args.get('next',url_for('index'))
 	file = None
 	if request.method == 'POST':
 		file = request.files['file']
@@ -80,7 +79,7 @@ def upload_zip():
 			course = BlackboardCourse(extract_path)
 			state.add_course(course)
 			state.save()
-			return redirect(next)
+			return redirect(url_for('course_index',course=course.pk))
 
 	return render_template('upload.html')
 

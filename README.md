@@ -20,7 +20,7 @@ The tool is a self-contained Python Flask server, which you can run on your own 
 
     pip install flask lxml
 
-Obtain a copy of the Blackboard SCORM analysis server (either clone this repository or download a .zip) and extract it into a directory on your PC.
+Obtain a copy of the Blackboard SCORM analysis server (either clone this repository or [download a .zip](https://github.com/numbas/blackboard-scorm-analysis/archive/master.zip)) and extract it into a directory on your PC.
     
 To start the server, run
 

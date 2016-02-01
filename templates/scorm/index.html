@@ -24,19 +24,19 @@
 		text-align: center;
 		font-size: 0.5em;
 	}
-	.attempt-table .score.questions ul {
+	.attempt-table .score.questions .container {
 		padding: 0;
 		display: inline-block;
 		list-style: none;
 		width: 20em;
 	}
-	.attempt-table .score.questions li {
+	.attempt-table .score.questions .question {
 		display: inline-block;
 		height: 2.8em;
 		box-sizing: border-box;
 		border: 1px solid white;
 	}
-	.attempt-table .score.questions .unsubmitted {
+	.attempt-table .score.questions .question.unsubmitted {
 		opacity: 0.25;
 	}
 
@@ -50,7 +50,7 @@
 		<thead>
 			<tr>
 				<th colspan="2"><a href="?sort=name&order={% if sort != 'name' or order=='desc' %}asc{% else %}desc{% endif %}">User</th>
-				<th>Attempt number</th>
+				<th><a href="?sort=attempt&order={% if sort !='attempt' or order=='asc' %}desc{% else %}asc{% endif %}">Attempt number</a></th>
 				<th colspan="3"><a href="?sort=score&order={% if sort != 'score' or order=='asc' %}desc{% else %}asc{% endif %}">Score</a></th>
 				<th><a href="?sort=starttime&order={% if sort !='starttime' or order=='asc' %}desc{% else %}asc{% endif %}">Start time</a></th>
 				<th><a href="?sort=duration&order={% if sort !='duration' or order=='asc' %}desc{% else %}asc{% endif %}">Time spent</a></th>
@@ -71,14 +71,14 @@
 				<td class="score percent {{attempt.scaled_score|correctstyle}}">{{attempt.scaled_score|percent}}</td>
 				<td class="score raw {{attempt.scaled_score|correctstyle}}">{{attempt.raw_score}} / {{attempt.max_score}}</td>
 				<td class="score questions">
-					<ul>
-						{% for question in attempt.objectives %}<li style="width: {{(0.9*(question.max_score/attempt.max_score))|percent}}" class="{% if not question.answered %}unsubmitted {% endif %}{{question.scaled_score|correctstyle}}"></li>{% endfor %}
+					<ul class="container">
+						{% for question in attempt.objectives %}<a title="{{question.name}} - click to view transcript" href="{{url_for('attempt_report',course=course.pk,scorm=scorm.pk,attempt=attempt.pk)}}#question-{{question.question}}" style="width: {{(0.9*(question.max_score/attempt.max_score))|percent}}" class="question {% if not question.answered %}unsubmitted {% endif %}{{question.scaled_score|correctstyle}}"></a>{% endfor %}
 					</ul>
 				</td>
 				<td class="time start">{{attempt.start_time}}</td>
 				<td class="duration">{{attempt.duration}}</td>
-				<td><a href="{{url_for('attempt_report',pk=scorm.pk,attempt=attempt.pk)}}">Report</a></td>
-				<td><a href="{{url_for('review',pk=scorm.pk,attempt=attempt.pk)}}" target="_blank">Run</a></td>
+				<td><a href="{{url_for('attempt_report',course=course.pk,scorm=scorm.pk,attempt=attempt.pk)}}" title="View a summary of this attempt">Report</a></td>
+				<td><a href="{{url_for('review',course=course.pk,scorm=scorm.pk,attempt=attempt.pk)}}" target="_blank" title="View this attempt as the student saw it">Run</a></td>
 			</tr>
 			{% endfor %}
 		</tbody>

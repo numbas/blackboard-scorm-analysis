@@ -1,0 +1,56 @@
+{% extends "course/base.html" %}
+
+{% block includes %}
+	{{super()}}
+
+	<style type="text/css">
+		.course-contents {
+			padding: 0;
+			display: inline-block;
+		}
+		.course-contents li {
+			list-style: none;
+			margin: 0.5em 0;
+		}
+
+		.course-contents a {
+			text-decoration: none;
+		}
+
+		.course-contents .item {
+			clear: both;
+		}
+
+		.course-contents .item.toc {
+			font-size: 1.6em;
+		}
+
+		.course-contents .item.folder {
+			font-weight: bold;
+		}
+
+		.course-contents .item.other {
+			color: #999;
+		}
+
+		.course-contents .item.scorm {
+			height: 2.2em;
+		}
+
+		.course-contents .item.scorm .num-attempts {
+			float: right;
+			margin-left: 2em;
+			padding: 0.5em;
+			width: 10em;
+			text-align: right;
+		}
+	</style>
+{% endblock includes %}
+
+{% block coursecontent %}
+	<ul class="course-contents">
+		{% for item in course.items %}
+		{% include "course/courseitem.html" %}
+		{% endfor %}
+	</ul>
+{% endblock coursecontent %}

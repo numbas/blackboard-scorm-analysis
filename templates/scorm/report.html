@@ -3,18 +3,26 @@
 {% block includes %}
 {{super()}}
 <style type="text/css">
+	.info {
+		margin: 2em;
+	}
+
 	.objective-table .question-number {
 		text-align: right;
 	}
 
-	.interaction-table .question-header {
+	.question-header {
 		text-align: left;
 		padding: 2em 0 1em 0;
 		font-size: 1.2em;
 	}
-	.interaction-table .question-header .name {
+	.question-header .name {
 		font-weight: normal;
 		font-style: italic;
+	}
+
+	.interaction-table {
+		width: 100%;
 	}
 
 	table th {
@@ -43,9 +51,33 @@
 		margin: 0 0.3em;
 	}
 
-	.xml {
-		word-wrap: break-word;
+	.suspend-data {
+		max-height: 20em;
+		overflow-y: auto;
+		padding: 1em;
+		background: #e5e5e5;
+		color: #666;
 	}
+
+	.question-variables td {
+		text-align: right;
+		font-family: monospace;
+		padding-top: 0.5em;
+		padding-bottom: 0.5em;
+	}
+
+	.question-variables tr:nth-child(even) td {
+		background-color: #eee;
+	}
+
+	.question-variables .value {
+		padding-left: 2em;
+	}
+
+	.question-variables .name::after {
+		content: ' :';
+	}
+
 </style>
 {% endblock includes %}
 
@@ -57,15 +89,13 @@
 
 {% block scormcontent %}
 
-	<p class="run"><a href="{{url_for('review',pk=scorm.pk,attempt=attempt.pk)}}">Run in review mode</a></p>
+	<p class="run"><a href="{{url_for('review',course=course.pk,scorm=scorm.pk,attempt=attempt.pk)}}">Run in review mode</a></p>
 
 	<table class="info">
 		<tr><th>Attempt number</th><td>{{attempt.number}}</td></tr>
 		<tr><th>Start time</th><td>{{attempt.start_time}}</td></tr>
 		<tr><th>Duration</th><td>{{attempt.duration}}</td></tr>
 	</table>
-
-	<h4>Questions</h4>
 
 	<table class="objective-table">
 		<thead>
@@ -85,33 +115,43 @@
 		</tbody>
 	</table>
 
-	<h4>Parts</h4>
-
-	<table class="interaction-table">
-		{% for question,interactions in attempt.interactions_by_question %}
-		<tr>
-			<th class="question-header" colspan="6" id="question-{{question.question}}">Question {{question.question}} - <span class="name">{{question.name}}</span></th>
-		</tr>
-		<tr>
-			<th></th>
-			<th>Type</th>
-			<th>Learner's response</th>
-			<th>Correct response</th>
-			<th colspan="2">Score</th>
-		</tr>
-		{% for interaction in interactions %}
-		<tr class="interaction {{interaction.part_type}}">
-			<td class="part">{{interaction.name}}</td>
-			<td class="type">{{interaction.part_type_name}}</td>
-			<td class="response learner">{{interaction.learner_response}}</td>
-			<td class="response correct">{{interaction.correct_response}}</td>
-			<td class="score raw">{{interaction.raw_score}}</td>
-			<td class="score max">{{interaction.max_score}}</td>
-		</tr>
-		{% endfor %}
-		{% endfor %}
-	</table>
+	{% for question,interactions in attempt.interactions_by_question %}
+		<h5 class="question-header" id="question-{{question.question}}">Question {{question.question}} - <span class="name">{{question.name}}</span></h5>
+		<table class="interaction-table">
+			<tr>
+				<th></th>
+				<th>Type</th>
+				<th>Learner's response</th>
+				<th>Correct response</th>
+				<th colspan="2">Score</th>
+			</tr>
+			{% for interaction in interactions %}
+			<tr class="interaction {{interaction.part_type}}">
+				<td class="part">{{interaction.name}}</td>
+				<td class="type">{{interaction.part_type_name}}</td>
+				<td class="response learner">{{interaction.learner_response}}</td>
+				<td class="response correct">{{interaction.correct_response}}</td>
+				<td class="score raw">{{interaction.raw_score}}</td>
+				<td class="score max">{{interaction.max_score}}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		{% set variables = question.suspend_data.variables.items()|sort %}
+		<h6>Variables</h6>
+		{% if variables|count %}
+		<table class="question-variables">
+			{% for name,value in variables %}
+			<tr>
+			<td class="name">{{name}}</td>
+			<td class="value">{{value}}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		{% else %}
+		<p>No variables</p>
+		{% endif %}
+	{% endfor %}
 
 	<h4>Suspend data</h4>
-	<pre>{{attempt.suspend_data|pretty_json}}</pre>
+	<pre class="suspend-data">{{attempt.suspend_data|pretty_json}}</pre>
 {% endblock scormcontent %}

@@ -1,29 +1,34 @@
+from flask import Flask, request, redirect, url_for, render_template, send_from_directory
+from werkzeug.routing import BaseConverter
 from functools import wraps
 import os
-from flask import Flask, request, redirect, url_for, render_template, send_from_directory
-from blackboardscorm import BlackboardCourse
-import zipfile
+import shutil
 import json
+import zipfile
 from lxml import etree
 from datetime import datetime
-import shutil
+from blackboardscorm import State,BlackboardCourse
 
 app = Flask(__name__)
 
-current_file = None
-zip = None
-course = None
-scorms_by_pk = {}
-extract_path = 'archive'
-course = BlackboardCourse(extract_path)
+extract_root = 'courses'
+state = State()
 
-def file_required(fn):
+## view decorator
+def with_course(fn):
 	@wraps(fn)
 	def inner(*args,**kwargs):
-		if course is None:
-			return redirect(url_for('upload_zip')+'?next='+request.path)
+		course = kwargs['course'] = state.courses_by_pk[kwargs['course']]
+		if 'scorm' in kwargs:
+			kwargs['scorm'] = course.scorms_by_pk[kwargs['scorm']]
 		return fn(*args,**kwargs)
 	return inner
+
+## template filters
+
+@app.template_filter('pluralize')
+def percent(n):
+	return '' if n==1 else 's'
 
 @app.template_filter('percent')
 def percent(n):
@@ -38,26 +43,19 @@ def correctstyle(n,bins=10):
 def pretty_json(d):
 	return json.dumps(d,indent=4,separators=(',',': '))
 
+## context processor
+
 @app.context_processor
 def context_scorms():
-	global current_file,course
 	return {
-			'current_file': current_file,
-			'course': course,
+		'state': state,
 	}
 
-@app.route('/zip/<path:path>')
-@file_required
-def file_from_zip(path):
-	return send_from_directory(extract_path,path)
+## views
 
 @app.route("/")
 def index():
-	if course is not None and len(course.scorms):
-		max_attempts = max(scorm.num_attempts for scorm in course.scorms)
-	else:
-		max_attempts = 0
-	return render_template('index.html',max_attempts=max_attempts)
+	return render_template('index.html')
 
 def allowed_file(filename):
 	name,ext = os.path.splitext(filename)
@@ -65,28 +63,46 @@ def allowed_file(filename):
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_zip():
-	global current_file,course
+	global state
 	next = request.args.get('next',url_for('index'))
 	file = None
 	if request.method == 'POST':
 		file = request.files['file']
 		if file and allowed_file(file.filename):
-			current_file = 'current_file.zip'
+			name,_ = os.path.splitext(file.filename)
 			zip = zipfile.ZipFile(file.stream)
+			extract_path = os.path.join(extract_root,name)
 			try:
 				shutil.rmtree(extract_path)
 			except FileNotFoundError:
 				pass
 			zip.extractall(extract_path)
 			course = BlackboardCourse(extract_path)
+			state.add_course(course)
+			state.save()
 			return redirect(next)
 
 	return render_template('upload.html')
 
+@app.route('/course/<course>')
+@with_course
+def course_index(course):
+	if len(course.scorms):
+		max_attempts = max(scorm.num_attempts for scorm in course.scorms)
+		min_attempts = min(scorm.num_attempts for scorm in course.scorms)
+	else:
+		max_attempts = 1
+		min_attempts = 0
+	return render_template('course/index.html',course=course,max_attempts=max_attempts,min_attempts=min_attempts,attempts_range=max(max_attempts-min_attempts,1))
 
-@app.route('/scorm/<pk>/')
-@file_required
-def view_scorm(pk):
+@app.route('/course/<course>/file/<path:path>')
+@with_course
+def course_file(course,path):
+	return send_from_directory(os.path.join(course.file_path),path)
+
+@app.route('/course/<course>/scorm/<scorm>/')
+@with_course
+def view_scorm(course,scorm):
 	sort = request.args.get('sort','name')
 	order = request.args.get('order','asc')
 
@@ -96,25 +112,23 @@ def view_scorm(pk):
 		'score': lambda a: (a.scaled_score,a.user.last_name,a.user.first_name,a.number),
 		'starttime': lambda a: a.start_time or datetime.fromtimestamp(0),
 		'duration': lambda a: a.duration,
+		'attempt': lambda a: (a.number, a.user.last_name,a.user.first_name,a.start_time),
 	}
-	scorm = course.scorms_by_pk[pk]
 	attempts = sorted(scorm.attempts,key=sorts[sort],reverse = order=='desc')
-	return render_template('scorm/index.html',scorm=scorm,attempts=attempts,sort=sort,order=order)
+	return render_template('scorm/index.html',course=course,scorm=scorm,attempts=attempts,sort=sort,order=order)
 
-@app.route('/scorm/<pk>/attempt/<attempt>')
-@file_required
-def attempt_report(pk,attempt):
-	scorm = course.scorms_by_pk[pk]
+@app.route('/course/<course>/scorm/<scorm>/attempt/<attempt>')
+@with_course
+def attempt_report(course,scorm,attempt):
 	attempt = scorm.attempts_by_pk[attempt]
-	return render_template('scorm/report.html',scorm=scorm,attempt=attempt)
+	return render_template('scorm/report.html',course=course,scorm=scorm,attempt=attempt)
 
-@app.route('/scorm/<pk>/attempt/<attempt>/review')
-@file_required
-def review(pk,attempt):
-	scorm = course.scorms_by_pk[pk]
+@app.route('/course/<course>/scorm/<scorm>/attempt/<attempt>/review')
+@with_course
+def review(course,scorm,attempt):
 	attempt = scorm.attempts_by_pk[attempt]
 	
-	iframe = url_for('file_from_zip',path='{}/index.html'.format(scorm.pk))
+	iframe = url_for('course_file',course=course.pk,path='{}/index.html'.format(scorm.pk))
 
 	cmi = {
 		'cmi.mode': 'review',
@@ -174,7 +188,7 @@ def review(pk,attempt):
 	else:
 		d['correct_responses._count'] = 0
 
-	return render_template('scorm/review.html',scorm=scorm,attempt=attempt,iframe=iframe,cmi=cmi)
+	return render_template('scorm/review.html',course=course,scorm=scorm,attempt=attempt,iframe=iframe,cmi=cmi)
 
 if __name__ == '__main__':
 	app.run(debug=True)

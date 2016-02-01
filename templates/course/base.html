@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}{{course.title}} - {{super()}}{% endblock title %}
+
+{% block header %}
+	{{super()}}
+	<hr/>
+	<h2><a href="{{url_for('course_index',course=course.pk)}}">{{course.title}}</a></h2>
+{% endblock header %}
+
+{% block content %}
+	{% block coursecontent %}{% endblock coursecontent %}
+{% endblock content %}

@@ -1,0 +1,19 @@
+{% if item.kind != "toc" or item.subitems %}
+<li>
+	<p class="item {{item.kind}}">
+	{% if item.kind=="scorm" %}
+		<a href="{{url_for('view_scorm',course=course.pk,scorm=item.scorm.pk)}}">{{item.title}}</a>
+		<span class="num-attempts {{((item.scorm.num_attempts-min_attempts)/attempts_range)|correctstyle}}">{{item.scorm.num_attempts}} attempt{{item.scorm.num_attempts|pluralize}}</span>
+	{% else %}
+		{{item.title}}
+	{% endif %}
+	</p>
+{% if item.subitems %}
+<ul>
+{% for subitem in item.subitems %}
+{% with item=subitem %}{% include "course/courseitem.html" %}{% endwith %}
+{% endfor %}
+</ul>
+{% endif %}
+</li>
+{% endif %}

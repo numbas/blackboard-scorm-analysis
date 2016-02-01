@@ -5,6 +5,18 @@ import re
 import zipfile
 from itertools import groupby
 from datetime import datetime,timedelta
+from unicodedata import normalize
+
+_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+def slugify(text, delim='-'):
+	result = []
+	for word in _punct_re.split(text.lower()):
+		word = normalize('NFKD', word)
+		if word:
+			result.append(word)
+	return delim.join(result)
+
 
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
@@ -186,6 +198,9 @@ class BlackboardCourse(object):
 		manifest = self.open_file('imsmanifest.xml')
 		self.doc = etree.fromstring(manifest)
 
+		self.title = self.doc.xpath('//resource[@type="course/x-bb-coursesetting"]')[0].get('{http://www.blackboard.com/content-packaging/}title')
+		self.slug = self.pk = slugify(self.title)
+
 		self.scorms = []
 		self.scorms_by_pk = {}
 
@@ -250,14 +265,32 @@ class BlackboardCourse(object):
 		self.scorms.append(scorm)
 		return scorm
 
-def load_scorms(zip):
-	scorms = []
+class State(object):
+	def __init__(self):
+		self.courses = []
+		self.courses_by_pk = {}
 
-	for resource in doc.xpath('//resource[@type="resource/x-plugin-scormengine"]'):
-		dat_filename = resource.get('{http://www.blackboard.com/content-packaging/}file')
-		
-		scorm_doc = etree.fromstring(zip.open(dat_filename).read())
-		scorm = SCORM(scorm_doc)
-		scorms.append(scorm)
-	
-	return scorms
+		try:
+			data = json.loads(open('state.json').read())
+		except FileNotFoundError:
+			return
+
+		for course_data in data.get('courses',[]):
+			course = BlackboardCourse(course_data['extract_path'])
+			self.add_course(course)
+
+	def add_course(self,course):
+		if course.pk in self.courses_by_pk:
+			i = self.courses.index(course.pk)
+			self.courses[i] = course
+		else:
+			self.courses.append(course)
+		self.courses_by_pk[course.pk] = course
+
+	def save(self):
+		data = {
+			'courses': [{'extract_path': course.file_path} for course in self.courses]
+		}
+		f = open('state.json','w')
+		f.write(json.dumps(data))
+		f.close()

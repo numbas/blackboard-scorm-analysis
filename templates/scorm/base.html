@@ -1,15 +1,14 @@
-{% extends "base.html" %}
+{% extends "course/base.html" %}
 
 {% block title %}{{scorm.title}} - {{super()}}{% endblock title %}
 
 {% block header %}
 	{{super()}}
 	<hr/>
-	<h2><a href="{{url_for('view_scorm',pk=scorm.pk)}}">{{scorm.title}}</a></h2>
+	<h2><a href="{{url_for('view_scorm',course=course.pk,scorm=scorm.pk)}}">{{scorm.title}}</a></h2>
 {% endblock header %}
 
-{% block content %}
-
+{% block coursecontent %}
 	{% block scormcontent %}{% endblock scormcontent %}
-{% endblock content %}
+{% endblock coursecontent %}
 

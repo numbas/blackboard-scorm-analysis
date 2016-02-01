@@ -32,10 +32,10 @@ And open `http://localhost:5000` in your browser.
 
 ## Uploading a course
 
-* Go to your Blackboard course, and click on Packages and Utilities, then Export/Archive Course.
-* Click on the Archive Organisation button.
-* In the following form, make sure Inclue Grade Centre History is ticked, then click Submit.
-* It takes a while to create the archive. You'll get an email when it's ready - once that happens, go back to the Export/Archive Organisation page and click on the .zip file to download it.
+* Go to your Blackboard course, and click on _Packages and Utilities_, then _Export/Archive Course_.
+* Click on the _Archive Course_ button.
+* In the following form, make sure _Include Grade Centre History_ is ticked, then click _Submit_.
+* It takes a while to create the archive. You'll get an email when it's ready - once that happens, go back to the _Export/Archive Course_ page and click on the .zip file to download it.
 * In the Blackboard SCORM analysis tool, click on _Upload a zip file_, and then upload the file you just got from Blackboard.
 
 You can update a course's data by generating another archive and uploading that. The old version will be automatically rewritten.

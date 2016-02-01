@@ -2,7 +2,7 @@
 <html>
 	<head>
 		{% block head %}
-		<title>{% block title %}Blackboard reader{% endblock title %}</title>
+		<title>{% block title %}Blackboard SCORM analysis{% endblock title %}</title>
 
 		{% block includes %}
 		<style type="text/css">
@@ -78,14 +78,14 @@
 	<body>
 		<header>
 		{% block header %}
-			<h1><a href="{{url_for('index')}}">Blackboard SCORM reader</a></h1>
+			<h1><a href="{{url_for('index')}}">Blackboard SCORM analysis</a></h1>
 		{% endblock header %}
 		</header>
 
 		{% block content %}{% endblock content %}
 
 		<footer>
-			<p><strong>Blackboard SCORM reader</strong> created by Newcastle University, © 2016.</p>
+			<p><strong>Blackboard SCORM analysis</strong> created by Newcastle University, © 2016.</p>
 		</footer>
 	</body>
 </html>

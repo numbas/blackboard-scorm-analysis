@@ -37,6 +37,10 @@
 		color: #999;
 	}
 
+	.interaction-table tbody tr:nth-child(even) td {
+		background: hsl(240, 80%, 98%);
+	}
+
 	.score.raw {
 		padding-right: 0;
 		text-align: right;
@@ -52,6 +56,9 @@
 	}
 
 	.suspend-data {
+		width: 100%;
+		font-size: 1rem;
+		min-height: 20em;
 		max-height: 20em;
 		overflow-y: auto;
 		padding: 1em;
@@ -153,5 +160,5 @@
 	{% endfor %}
 
 	<h4>Suspend data</h4>
-	<pre class="suspend-data">{{attempt.suspend_data|pretty_json}}</pre>
+	<textarea disabled class="suspend-data">{{attempt.suspend_data|pretty_json}}</textarea>
 {% endblock scormcontent %}

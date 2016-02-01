@@ -1,5 +1,7 @@
 # Blackboard SCORM analysis
 
+![Part of a report](http://numbas.github.io/blackboard-scorm-analysis/blackboard-report.png)
+
 Blackboard doesn't make it easy to anaylse data to do with SCORM packages: the built-in SCORM reports don't give much useful information and are tedious to generate, and it's unclear where in the database the SCORM data lies.
 
 We discovered that the _Export/Archive Course_ tool collects together all of the attempt data for SCORM packages in a way that can be easily interpreted.

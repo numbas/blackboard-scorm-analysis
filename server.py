@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, render_template, send_from_directory
+from flask import Flask, request, redirect, url_for, render_template, send_from_directory, Response
 from werkzeug.routing import BaseConverter
 from functools import wraps
 import os
@@ -8,11 +8,14 @@ import zipfile
 from lxml import etree
 from datetime import datetime
 from blackboardscorm import State,BlackboardCourse
+import tempfile
+import csv
 
 app = Flask(__name__)
 
 extract_root = 'courses'
 state = State()
+print("Ready")
 
 ## view decorator
 def with_course(fn):
@@ -115,6 +118,23 @@ def view_scorm(course,scorm):
 	}
 	attempts = sorted(scorm.attempts,key=sorts[sort],reverse = order=='desc')
 	return render_template('scorm/index.html',course=course,scorm=scorm,attempts=attempts,sort=sort,order=order)
+
+@app.route('/course/<course>/scorm/<scorm>.csv')
+@with_course
+def scorm_csv(course,scorm):
+	f = tempfile.TemporaryFile('w+',newline='')
+	w = csv.writer(f,lineterminator='\n')
+	w.writerow(['Full Name','Username','Start time','Time spent','Raw Score','Scaled Score']+['objective {}'.format(i) for i in scorm.objective_ids])
+	for attempt in scorm.attempts:
+		objective_scores = []
+		for objective_id in scorm.objective_ids:
+			if objective_id in attempt.objectives_by_id:
+				objective_scores.append(attempt.objectives_by_id[objective_id].raw_score)
+			else:
+				objective_scores.append('')
+		w.writerow([attempt.user.fullname,attempt.user.username,attempt.start_time,attempt.total_time,attempt.raw_score,attempt.scaled_score*100]+objective_scores)
+	f.seek(0)
+	return Response(f.read(),mimetype='text/csv')
 
 @app.route('/course/<course>/scorm/<scorm>/attempt/<attempt>')
 @with_course

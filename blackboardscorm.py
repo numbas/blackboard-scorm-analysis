@@ -44,6 +44,7 @@ class SCORM(object):
 
 		registrations = self.doc.xpath('//registration')
 		self.attempts = sorted([Attempt(self,registration) for registration in registrations],key=lambda a:a.userid)
+		self.objective_ids = list(set(sum([list(a.objectives_by_id.keys()) for a in self.attempts],[])))
 		self.num_attempts = len(self.attempts)
 		self.attempts_by_pk = {a.pk:a for a in self.attempts}
 		

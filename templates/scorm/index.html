@@ -46,6 +46,11 @@
 {% endblock includes %}
 
 {% block scormcontent %}
+
+	<div class="admin">
+		<p class="csv"><a href="{{url_for('scorm_csv',course=course.pk,scorm=scorm.pk)}}">CSV export of this report</a></p>
+	</div>
+
 	<table class="attempt-table">
 		<thead>
 			<tr>

@@ -6,6 +6,7 @@ import zipfile
 from itertools import groupby
 from datetime import datetime,timedelta
 from unicodedata import normalize
+from random import choice
 
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
@@ -34,6 +35,23 @@ success_statuses = [
 	'failed',
 	'passed',
 ]
+
+def fuzz(s):
+	return s
+	def fuzz_character(c):
+		if c>='a' and c<='z':
+			return choice('abcdefghijklmnopqrstuvwxyz')
+		elif c>='A' and c<='Z':
+			return choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+		elif c>='0' and c<='9':
+			return choice('0123456789')
+		elif c==' ':
+			return ' '
+		else:
+			return '.'
+	return ''.join(fuzz_character(c) for c in s)
+
+
 
 class SCORM(object):
 	def __init__(self,course,doc):
@@ -179,13 +197,13 @@ class User(object):
 	def __init__(self,element):
 		self.element = element
 		self.id = element.get('id')
-		self.username = element.xpath('USERNAME')[0].get('value')
-		self.studentid = element.xpath('STUDENTID')[0].get('value')
-		self.first_name = element.xpath('NAMES/GIVEN')[0].get('value')
-		self.middle_name = element.xpath('NAMES/MIDDLE')[0].get('value')
-		self.last_name = element.xpath('NAMES/FAMILY')[0].get('value')
+		self.username = fuzz(element.xpath('USERNAME')[0].get('value'))
+		self.studentid = fuzz(element.xpath('STUDENTID')[0].get('value'))
+		self.first_name = fuzz(element.xpath('NAMES/GIVEN')[0].get('value'))
+		self.middle_name = fuzz(element.xpath('NAMES/MIDDLE')[0].get('value'))
+		self.last_name = fuzz(element.xpath('NAMES/FAMILY')[0].get('value'))
 		self.fullname = '{}{} {}'.format(self.first_name,' '+self.middle_name if self.middle_name else '',self.last_name)
-		self.email = element.xpath('EMAILADDRESS')[0].get('value')
+		self.email = fuzz(element.xpath('EMAILADDRESS')[0].get('value'))
 
 class HierarchyItem(object):
 	def __init__(self,title):

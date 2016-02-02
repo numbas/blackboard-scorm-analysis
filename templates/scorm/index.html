@@ -3,6 +3,27 @@
 {% block includes %}
 {{super()}}
 <style type="text/css">
+
+	.charts {
+		display: flex;
+	}
+
+	.chart-container {
+		flex-basis: 50%;
+		margin: 2rem 1rem;
+		border: 3px solid #eee;
+		padding: 0.5rem;
+		max-width: 90rem;
+	}
+	.chart-container .caption {
+		text-align: center;
+		margin: 0.2rem;
+	}
+
+	#start-time-plot .ct-bar {
+		stroke-width: 4px;
+	}
+
 	.attempt-table {
 		border-collapse: collapse;
 	}
@@ -43,12 +64,64 @@
 
 
 </style>
+
+<script language="javascript" src="{{url_for('static',filename='chartist.min.js')}}"></script>
+<script language="javascript" src="{{url_for('static',filename='moment.js')}}"></script>
+<link rel="stylesheet" href="{{url_for('static',filename='chartist.min.css')}}"></link>
+
+<script language="javascript">
+	var start_time_plot_data = {{start_time_plot_data|tojson|safe}}
+	var score_bins = {{score_bins|tojson|safe}}
+	window.onload = function() {
+		var start_time_plot = new Chartist.Bar('#start-time-plot .chart',{
+			labels: start_time_plot_data.map(function(a){return a.time}),
+			series: [start_time_plot_data.map(function(a){return {x:a.x, y:a.n}})]
+		},
+		{
+			showLine: false,
+			low: 0,
+			axisX: {
+				type: Chartist.AutoScaleAxis,
+				onlyInteger: true,
+				scaleMinSpace: 80,
+				labelInterpolationFnc: function(value) {
+					var d = moment(value*1000);
+					return d.format('DD MMM YYYY');
+				}
+			}
+		});
+
+		var score_labels = [];
+		for(var i=0;i<100;i+=10) {
+			score_labels.push(i+'-'+(i+10)+'%');
+		}
+		var score_distribution_plot = new Chartist.Bar('#score-distribution-plot .chart',{
+			labels: score_labels,
+			series: [score_bins.map(function(n,i){return {x:i*10+5,y:n}})]
+		},
+		{
+			low: 0,
+		});
+	}
+</script>
 {% endblock includes %}
 
 {% block scormcontent %}
 
 	<div class="admin">
 		<p class="csv"><a href="{{url_for('scorm_csv',course=course.pk,scorm=scorm.pk)}}">CSV export of this report</a></p>
+	</div>
+
+	<div class="charts">
+		<div class="chart-container" id="start-time-plot">
+			<h4 class="caption">Start times of attempts</h4>
+			<div class="chart"></div>
+		</div>
+
+		<div class="chart-container" id="score-distribution-plot">
+			<h4 class="caption">Score distribution</h4>
+			<div class="chart"></div>
+		</div>
 	</div>
 
 	<table class="attempt-table">

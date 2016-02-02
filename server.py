@@ -6,10 +6,11 @@ import shutil
 import json
 import zipfile
 from lxml import etree
-from datetime import datetime
+from datetime import datetime,date
 from blackboardscorm import State,BlackboardCourse
 import tempfile
 import csv
+import itertools
 
 app = Flask(__name__)
 
@@ -117,7 +118,23 @@ def view_scorm(course,scorm):
 		'attempt': lambda a: (a.number, a.user.last_name,a.user.first_name,a.start_time),
 	}
 	attempts = sorted(scorm.attempts,key=sorts[sort],reverse = order=='desc')
-	return render_template('scorm/index.html',course=course,scorm=scorm,attempts=attempts,sort=sort,order=order)
+
+	get_start_time = lambda a: datetime(a.start_time.year,a.start_time.month,a.start_time.day)
+	epoch = datetime.fromtimestamp(0)
+	attempts_by_date = sorted([a for a in scorm.attempts if a.start_time is not None],key=get_start_time)
+	start_time_plot_data = [{'time': time.strftime('%d %B %Y'), 'x': time.timestamp(), 'n': len(list(attempts))} for time,attempts in itertools.groupby(attempts_by_date,key=get_start_time)]
+
+	score_bins = [len([a for a in scorm.attempts if a.scaled_score>=x/10 and a.scaled_score<(x+1)/10]) for x in range(10)]
+
+	return render_template('scorm/index.html',
+			course=course,
+			scorm=scorm,
+			attempts=attempts,
+			sort=sort,
+			order=order,
+			start_time_plot_data = start_time_plot_data,
+			score_bins = score_bins
+		)
 
 @app.route('/course/<course>/scorm/<scorm>.csv')
 @with_course

@@ -6,11 +6,12 @@ import shutil
 import json
 import zipfile
 from lxml import etree
-from datetime import datetime,date
+from datetime import datetime,date,timedelta
 from blackboardscorm import State,BlackboardCourse
 import tempfile
 import csv
 import itertools
+import pygal
 
 app = Flask(__name__)
 
@@ -103,6 +104,72 @@ def course_index(course):
 def course_file(course,path):
 	return send_from_directory(os.path.join(course.file_path),path)
 
+def start_time_chart(attempts,width=800,height=250):
+	get_start_time = lambda a: datetime(a.start_time.year,a.start_time.month,a.start_time.day)
+	attempts_by_date = sorted([a for a in attempts if a.start_time is not None],key=get_start_time)
+	attempts_by_day = {time:len(list(attempts)) for time,attempts in itertools.groupby(attempts_by_date,key=get_start_time)}
+
+	aday = timedelta(days=1)
+	start = min(attempts_by_day.keys())
+	end = max(attempts_by_day.keys())
+	num_days = (end-start).days
+	days = [start+aday*i for i in range(num_days+1)]
+	data = [(day,attempts_by_day.get(day,0)) for day in days]
+
+	chart = pygal.DateLine(width=width,height=height,show_legend=False)
+	chart.title = 'Start times of attempts'
+	chart.add("Attempts started",data)
+
+	return chart
+
+def start_time_sparkline(attempts,width=800,height=250):
+	get_start_time = lambda a: datetime(a.start_time.year,a.start_time.month,a.start_time.day)
+	attempts_by_date = sorted([a for a in attempts if a.start_time is not None],key=get_start_time)
+	attempts_by_day = {time:len(list(attempts)) for time,attempts in itertools.groupby(attempts_by_date,key=get_start_time)}
+
+	aday = timedelta(days=1)
+	start = min(attempts_by_day.keys())
+	end = max(attempts_by_day.keys())
+	num_days = (end-start).days
+	data = [(i,attempts_by_day.get(start+aday*i,0)) for i in range(num_days+1)]
+
+	chart = pygal.XY(width=width,height=height)
+	chart.add("",data)
+
+	return chart
+
+def score_chart(attempts,width=800,height=250):
+	score_bins = [len([a for a in attempts if a.scaled_score>=x/10 and a.scaled_score<(x+1)/10]) for x in range(10)]
+
+	chart = pygal.Bar(width=width,height=height,show_legend=False,human_readable=True)
+	chart.title = 'Score distribution'
+	chart.add('Number of attempts',score_bins)
+	chart.x_labels = ['{}-{}%'.format(i,i+10) for i in range(0,100,10)]
+
+	return chart
+
+@app.route('/course/<course>/scorm/<scorm>/start-times.svg')
+@with_course
+def start_time_chart_svg(course,scorm):
+	return start_time_chart(scorm.attempts).render_response()
+
+@app.route('/course/<course>/scorm/<scorm>/start-times-sparkline.svg')
+@with_course
+def start_time_sparkline_svg(course,scorm):
+	return Response(start_time_sparkline(scorm.attempts).render_sparkline().decode('utf-8'),mimetype='image/svg+xml')
+
+@app.route('/course/<course>/scorm/<scorm>/scores.svg')
+@with_course
+def score_chart_svg(course,scorm):
+	return score_chart(scorm.attempts).render_response()
+
+@app.route('/course/<course>/scorm/<scorm>/score-sparkline.svg')
+@with_course
+def score_sparkline_svg(course,scorm):
+	chart = score_chart(scorm.attempts)
+	chart.title = ''
+	return Response(chart.render_sparkline().decode('utf-8'),mimetype='image/svg+xml')
+
 @app.route('/course/<course>/scorm/<scorm>/')
 @with_course
 def view_scorm(course,scorm):
@@ -119,21 +186,14 @@ def view_scorm(course,scorm):
 	}
 	attempts = sorted(scorm.attempts,key=sorts[sort],reverse = order=='desc')
 
-	get_start_time = lambda a: datetime(a.start_time.year,a.start_time.month,a.start_time.day)
-	epoch = datetime.fromtimestamp(0)
-	attempts_by_date = sorted([a for a in scorm.attempts if a.start_time is not None],key=get_start_time)
-	start_time_plot_data = [{'time': time.strftime('%d %B %Y'), 'x': time.timestamp(), 'n': len(list(attempts))} for time,attempts in itertools.groupby(attempts_by_date,key=get_start_time)]
-
-	score_bins = [len([a for a in scorm.attempts if a.scaled_score>=x/10 and a.scaled_score<(x+1)/10]) for x in range(10)]
-
 	return render_template('scorm/index.html',
 			course=course,
 			scorm=scorm,
 			attempts=attempts,
 			sort=sort,
 			order=order,
-			start_time_plot_data = start_time_plot_data,
-			score_bins = score_bins
+			start_time_chart = start_time_chart(scorm.attempts).render().decode('utf-8'),
+			score_chart = score_chart(scorm.attempts).render().decode('utf-8')
 		)
 
 @app.route('/course/<course>/scorm/<scorm>.csv')

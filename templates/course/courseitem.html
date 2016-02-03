@@ -3,7 +3,12 @@
 	<p class="item {{item.kind}}">
 	{% if item.kind=="scorm" %}
 		<a href="{{url_for('view_scorm',course=course.pk,scorm=item.scorm.pk)}}">{{item.title}}</a>
-		<span class="num-attempts {{((item.scorm.num_attempts-min_attempts)/attempts_range)|correctstyle}}">{{item.scorm.num_attempts}} attempt{{item.scorm.num_attempts|pluralize}}</span>
+		<span class="stats">
+			<object class="sparkline" data="{{url_for('start_time_sparkline_svg',course=course.pk,scorm=item.scorm.pk)}}")></object>
+			<object class="sparkline" data="{{url_for('score_sparkline_svg',course=course.pk,scorm=item.scorm.pk)}}")></object>
+			<span class="num-attempts {{((item.scorm.num_attempts-min_attempts)/attempts_range)|correctstyle}}">{{item.scorm.num_attempts}} attempt{{item.scorm.num_attempts|pluralize}}</span>
+		</span>
+
 	{% else %}
 		{{item.title}}
 	{% endif %}

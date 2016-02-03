@@ -20,7 +20,7 @@ Finally, the reported durations of attempts only rarely match up with reality. B
 
 The tool is a self-contained Python Flask server, which you can run on your own PC. Install [Python 3](https://www.python.org/downloads/), and then install the required Python packages by running the following command:
 
-    pip install flask lxml
+    pip install flask lxml pygal
 
 Obtain a copy of the Blackboard SCORM analysis server (either clone this repository or [download a .zip](https://github.com/numbas/blackboard-scorm-analysis/archive/master.zip)) and extract it into a directory on your PC.
     

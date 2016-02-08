@@ -109,9 +109,9 @@ class Attempt(object):
 		self.interactions_by_id = {i.id:i for i in self.interactions}
 
 		for interaction in self.interactions:
-			interaction.question = self.objectives_by_id[interaction.question_number]
+			interaction.question = self.objectives_by_id.get(interaction.question_number)
 
-		self.interactions_by_question = [(self.objectives_by_id[q],sorted(list(interactions),key=lambda i:(i.part,i.gap or 0))) for q,interactions in groupby(self.interactions,key=lambda i: i.question_number)]
+		self.interactions_by_question = [(self.objectives_by_id.get(q,-1),sorted(list(interactions),key=lambda i:(i.part,i.gap or 0))) for q,interactions in groupby(self.interactions,key=lambda i: i.question_number)]
 
 type_names = {
 	'information': 'Information only',

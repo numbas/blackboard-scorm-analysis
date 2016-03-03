@@ -185,6 +185,7 @@ class Objective(object):
 		self.min_score = float(element.get('ScoreMin'))
 		self.max_score = float(element.get('ScoreMax'))
 		self.scaled_score = float(element.get('ScoreScaled','0'))
+		self.percent_score = self.raw_score/self.max_score if self.max_score>0 else 0
 
 		m = re.match(r'^q(?P<question>\d+)',self.id)
 		self.question = int(m.group('question'))+1

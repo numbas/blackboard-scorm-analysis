@@ -116,8 +116,8 @@
 			<tr>
 				<td class="question-name"><a href="#question-{{objective.question}}">{{objective.name}}</a></td>
 				<td class="question-number"><a href="#question-{{objective.question}}">{{objective.question}}</a></td>
-				<td class="score raw {{(objective.raw_score/objective.max_score)|correctstyle}}">{{objective.raw_score}}</td>
-				<td class="score max {{(objective.raw_score/objective.max_score)|correctstyle}}">{{objective.max_score}}</td>
+				<td class="score raw {{objective.percent_score|correctstyle}}">{{objective.raw_score}}</td>
+				<td class="score max {{objective.percent_score|correctstyle}}">{{objective.max_score}}</td>
 			</tr>
 			{% endfor %}
 		</tbody>

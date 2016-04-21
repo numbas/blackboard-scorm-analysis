@@ -244,10 +244,12 @@ class BlackboardCourse(object):
 		self.items = [self.load_item(item) for item in organization.xpath('item')]
 
 	def load_item(self,element):
-		ref = element.get('identifierref')
-		item_doc = etree.fromstring(self.open_file('{}.dat'.format(ref)))
 		title_element = element.xpath('title')
 		title = title_element[0].text if len(title_element) else ''
+		if re.match(r'^placeholder/',title):
+			return self.load_item(element.xpath('item')[0])
+		ref = element.get('identifierref')
+		item_doc = etree.fromstring(self.open_file('{}.dat'.format(ref)))
 
 		item = HierarchyItem(title)
 		item.ref = ref

@@ -14,6 +14,8 @@ We've found that Blackboard often loses data, or saves inconsistent data. That c
 
 This happens in a small but significant number of cases. It should be obvious on looking at an individual attempt whether there's something wrong, but bear in mind that inconsistencies can appear if you try to do analyse the set of attempts as a whole.
 
+We've also had a report that if any student has unenrolled from a course, the export will stop as soon as it tries to match an attempt by that student with their Grade Centre entry. This means that tests will appear to have far fewer attempts in the analysis tool than are shown in the Grade Centre.
+
 Finally, the reported durations of attempts only rarely match up with reality. Best not to try to draw any conclusions from those.
 
 ## Installation

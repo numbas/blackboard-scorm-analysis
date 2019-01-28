@@ -95,7 +95,7 @@ class Attempt(object):
 		self.min_score = float(activity_run_time.get('ScoreMin','0'))
 		self.max_score = float(activity_run_time.get('ScoreMax','0'))
 		start_time = activity.get('AttemptStartTimestampUtc')
-		self.start_time = datetime.strptime(start_time,'%Y-%m-%dT%H:%M:%S') if start_time else None
+		self.start_time = datetime.strptime(start_time,'%Y-%m-%dT%H:%M:%S.%fZ') if start_time else None
 		self.location = activity_run_time.get('Location')
 		self.total_time = float(activity_run_time.get('TotalTimeTracked'))
 		
